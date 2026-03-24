@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Skills 智能编排系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #0a0c10; font-family: 'Inter', system-ui; }
+        .glass-card { background: rgba(17,24,39,0.8); backdrop-filter: blur(12px); border-radius: 1.5rem; border: 1px solid rgba(59,130,246,0.2); }
+        .log-line { border-left: 2px solid #3b82f6; padding-left: 0.75rem; margin-bottom: 0.75rem; font-size: 0.8rem; }
+        .preview-container { background: #1a1f2e; border-radius: 1rem; overflow: hidden; }
+        .tab-active { background: #3b82f6; color: white; }
+        .tab-inactive { background: transparent; color: #9ca3af; }
+        .design-badge { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <nav class="glass-card mx-4 mt-4 px-6 py-3 flex justify-between items-center sticky top-4 z-50">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-brain text-2xl text-blue-500"></i>
+            <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Agent Skills 编排系统</span>
+        </div>
+        <div class="flex gap-6 text-sm">
+            <a href="#" class="hover:text-blue-400">首页</a>
+            <a href="#" class="hover:text-blue-400">技能库</a>
+            <a href="#" class="hover:text-blue-400">实验报告</a>
+        </div>
+    </nav>
+
+    <div class="text-center py-12">
+        <div class="inline-flex gap-3 mb-4">
+            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs"><i class="fas fa-robot mr-1"></i>Agent</span>
+            <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs"><i class="fas fa-puzzle-piece mr-1"></i>Skills</span>
+            <span class="design-badge px-3 py-1 rounded-full text-white text-xs"><i class="fas fa-palette mr-1"></i>设计稿模式</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">多智能体技能编排系统</h1>
+        <p class="text-gray-400 mt-3">用 CSS 绘制精致图案 · 不依赖外部图片</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 pb-12">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- 左侧 -->
+            <div class="space-y-5">
+                <div class="glass-card p-5">
+                    <h3 class="font-semibold mb-3"><i class="fas fa-edit text-blue-400 mr-2"></i>需求输入</h3>
+                    <textarea id="userPrompt" rows="6" class="w-full bg-gray-800/50 border border-gray-700 rounded-xl p-3 text-sm" placeholder="例如：生成一个刺身专门店官网，日式暖色调，三文鱼、金枪鱼、甜虾三个菜品，每个用不同的CSS图案"></textarea>
+                    <button id="generateBtn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-2">✨ 执行 Agent 调用</button>
+                    <button id="clearBtn" class="mt-2 w-full bg-gray-700 hover:bg-gray-600 rounded-xl py-2 text-sm">清空</button>
+                </div>
+
+                <div class="glass-card p-4">
+                    <h3 class="font-semibold mb-2 text-sm"><i class="fas fa-sync-alt text-purple-400 mr-2"></i>迭代修改</h3>
+                    <textarea id="iterationPrompt" rows="2" class="w-full bg-gray-800/50 border border-gray-700 rounded-xl p-2 text-xs" placeholder="例如：把三文鱼改成更红润 / 增加一个主厨推荐区"></textarea>
+                    <button id="iterateBtn" class="mt-2 w-full bg-purple-600 hover:bg-purple-700 rounded-lg py-1.5 text-xs">🔄 基于当前页面迭代修改</button>
+                </div>
+
+                <div class="glass-card p-4">
+                    <h3 class="font-semibold mb-2 text-sm"><i class="fas fa-list-ul text-blue-400 mr-2"></i>Agent 调用链路</h3>
+                    <div id="logArea" class="bg-black/30 rounded-xl p-3 h-48 overflow-y-auto text-xs font-mono">
+                        <div class="log-line text-blue-400">🤖 Agent 已就绪</div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-sliders-h text-blue-400"></i>
+                        <h3 class="font-semibold text-sm">个性化偏好</h3>
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="designMode" class="rounded" checked>
+                        <span class="text-xs text-gray-300">🎨 设计稿模式（CSS 精致图案，模拟真实质感）</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-2">关闭后使用简单图标占位</p>
+                </div>
+            </div>
+
+            <!-- 右侧预览 -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="flex border-b border-gray-700">
+                        <button id="previewTab" class="tab-active px-5 py-2.5 text-sm flex items-center gap-2"><i class="fas fa-eye"></i>预览</button>
+                        <button id="codeTab" class="tab-inactive px-5 py-2.5 text-sm flex items-center gap-2"><i class="fas fa-code"></i>代码</button>
+                    </div>
+                    <div id="previewView">
+                        <div class="preview-container relative">
+                            <iframe id="previewIframe" class="w-full" style="min-height: 600px; background: white;" srcdoc="<div style='display:flex;align-items:center;justify-content:center;height:100%;background:#0a0c10;color:#666'><i class='fas fa-brain' style='font-size:48px;color:#3b82f6'></i><p class='ml-3'>输入需求，点击生成</p></div>"></iframe>
+                            <button id="fullscreenBtn" class="absolute bottom-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur rounded-lg px-2 py-1 text-xs">🔍 全屏</button>
+                        </div>
+                    </div>
+                    <div id="codeView" class="hidden p-4">
+                        <div id="codeContent" class="bg-black/50 rounded-xl p-3 text-xs font-mono text-green-400 overflow-auto max-h-96">等待生成...</div>
+                        <button id="copyCodeBtn" class="mt-2 bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-1 text-xs">📋 复制代码</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 text-gray-500 text-xs border-t border-gray-800">
+        <p>Agent Skills 智能编排系统 · 设计稿模式 · CSS 艺术图案生成</p>
+    </footer>
+
+    <div id="fullscreenModal" class="fixed inset-0 z-[100] hidden bg-black/95">
+        <div class="relative w-full h-full">
+            <iframe id="fullscreenIframe" class="w-full h-full border-0 bg-white"></iframe>
+            <button id="closeFullscreen" class="absolute top-4 right-4 bg-white/10 rounded-full p-2"><i class="fas fa-times text-white"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const iterateBtn = document.getElementById('iterateBtn');
+        const userPrompt = document.getElementById('userPrompt');
+        const iterationPrompt = document.getElementById('iterationPrompt');
+        const previewIframe = document.getElementById('previewIframe');
+        const fullscreenIframe = document.getElementById('fullscreenIframe');
+        const codeContent = document.getElementById('codeContent');
+        const previewTab = document.getElementById('previewTab');
+        const codeTab = document.getElementById('codeTab');
+        const previewView = document.getElementById('previewView');
+        const codeView = document.getElementById('codeView');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenModal = document.getElementById('fullscreenModal');
+        const closeFullscreen = document.getElementById('closeFullscreen');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const logArea = document.getElementById('logArea');
+        const designMode = document.getElementById('designMode');
+
+        let currentHtmlCode = '';
+
+        function addLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log-line ${type === 'error' ? 'text-red-400' : 'text-blue-400'}`;
+            div.innerHTML = `${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${msg}`;
+            logArea.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (logArea.children.length > 12) logArea.removeChild(logArea.children[0]);
+        }
+
+        function clearLogs() { logArea.innerHTML = '<div class="log-line text-blue-400">🤖 Agent 已就绪</div>'; }
+
+        previewTab.onclick = () => {
+            previewTab.className = 'tab-active px-5 py-2.5 text-sm flex items-center gap-2';
+            codeTab.className = 'tab-inactive px-5 py-2.5 text-sm flex items-center gap-2';
+            previewView.classList.remove('hidden');
+            codeView.classList.add('hidden');
+        };
+        codeTab.onclick = () => {
+            codeTab.className = 'tab-active px-5 py-2.5 text-sm flex items-center gap-2';
+            previewTab.className = 'tab-inactive px-5 py-2.5 text-sm flex items-center gap-2';
+            previewView.classList.add('hidden');
+            codeView.classList.remove('hidden');
+        };
+        fullscreenBtn.onclick = () => { fullscreenIframe.srcdoc = currentHtmlCode || previewIframe.srcdoc; fullscreenModal.classList.remove('hidden'); };
+        closeFullscreen.onclick = () => fullscreenModal.classList.add('hidden');
+        copyCodeBtn.onclick = async () => { await navigator.clipboard.writeText(currentHtmlCode); alert('✅ 已复制'); };
+        clearBtn.onclick = () => {
+            userPrompt.value = '';
+            iterationPrompt.value = '';
+            previewIframe.srcdoc = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0a0c10;color:#666"><i class="fas fa-brain" style="font-size:48px;color:#3b82f6"></i><p class="ml-3">输入需求，点击生成</p></div>';
+            codeContent.innerText = '';
+            currentHtmlCode = '';
+            clearLogs();
+        };
+
+        async function callAgent(prompt, isIteration = false) {
+            const designModeEnabled = designMode.checked;
+            const fullPrompt = isIteration && currentHtmlCode 
+                ? `当前页面代码如下：\n${currentHtmlCode}\n\n请修改：${prompt}\n\n只改指定部分，保留其他内容。`
+                : `${prompt}\n\n${designModeEnabled ? '【设计稿模式】所有图片用 CSS 绘制精致图案，模拟真实质感，禁止用 Emoji 或图标。' : '【简单模式】图片用 Font Awesome 图标占位。'}`;
+            
+            addLog(`${isIteration ? '🔄 迭代' : '📝 生成'}: "${prompt.substring(0, 40)}..."`, 'info');
+            addLog(designModeEnabled ? '🎨 设计稿模式' : '⚡ 简单模式', 'info');
+            addLog('📡 调用智谱 GLM-4...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: fullPrompt })
+                });
+                const data = await response.json();
+                if (data.error) {
+                    addLog(`❌ ${data.error}`, 'error');
+                    return false;
+                }
+                let html = data.htmlCode;
+                const match = html.match(/```html?\n([\s\S]*?)\n```/);
+                if (match) html = match[1];
+                if (!html.includes('<!DOCTYPE')) html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>body{font-family:system-ui;margin:0;padding:0;background:#0a0c10;color:#fff;}</style></head><body>${html}</body></html>`;
+                currentHtmlCode = html;
+                previewIframe.srcdoc = html;
+                codeContent.innerText = html;
+                addLog('✅ 成功', 'success');
+                return true;
+            } catch(e) {
+                addLog(`❌ 连接失败: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        generateBtn.onclick = async () => {
+            const prompt = userPrompt.value.trim();
+            if (!prompt) { alert('请输入需求'); return; }
+            clearLogs();
+            previewIframe.srcdoc = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0a0c10;color:#3b82f6"><i class="fas fa-spinner fa-pulse"></i><span class="ml-2">生成中...</span></div>';
+            await callAgent(prompt, false);
+        };
+        iterateBtn.onclick = async () => {
+            const iteration = iterationPrompt.value.trim();
+            if (!iteration) { alert('请输入修改需求'); return; }
+            if (!currentHtmlCode) { alert('请先生成页面'); return; }
+            addLog(`🔄 迭代: ${iteration}`, 'info');
+            previewIframe.srcdoc = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0a0c10;color:#3b82f6"><i class="fas fa-spinner fa-pulse"></i><span class="ml-2">迭代中...</span></div>';
+            await callAgent(iteration, true);
+            iterationPrompt.value = '';
+        };
+    </script>
+</body>
+</html>
