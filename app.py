@@ -7,13 +7,9 @@ import re
 app = Flask(__name__)
 CORS(app)
 
-# ========== 在这里填你的 API Key ==========
 API_KEY = "d3ab65d686824584a5bf2fd4328eac18.MK3XXO2nfmOS0e90"
-# ========================================
-
 BASE_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
-# 内置技能提示词（云端没有本地文件，直接写在这里）
 SKILL_CONTENT = """你是顶级前端开发专家。严格按照以下原则生成代码：
 1. 配色：深色科技感背景 #0f172a，强调色 #3b82f6
 2. 所有图标用 Font Awesome 6
@@ -92,7 +88,6 @@ def ensure_complete_html(html_code):
 def generate():
     data = request.get_json()
     prompt = data.get('prompt', '')
-    
     if not prompt:
         return jsonify({'error': '请输入需求'}), 400
     
@@ -113,26 +108,18 @@ def generate():
     
     try:
         print(f"📡 开始处理需求: {prompt[:100]}...")
-        result, error = call_api_with_retry(payload, headers, max_retries=2, timeout=120)
-        
+        result, error = call_api_with_retry(payload, headers)
         if error:
-            print(f"❌ API调用失败: {error}")
             return jsonify({'error': error}), 500
-        
         if "choices" in result and len(result["choices"]) > 0:
             generated_code = result["choices"][0]["message"]["content"]
-            print(f"✅ API返回成功，长度: {len(generated_code)} 字符")
             clean_code = clean_html_code(generated_code)
             final_code = ensure_complete_html(clean_code)
             return jsonify({'htmlCode': final_code})
         else:
-            error_msg = result.get("error", {}).get("message", "未知错误")
-            return jsonify({'error': f'API错误: {error_msg}'}), 500
-            
+            return jsonify({'error': 'API返回格式错误'}), 500
     except Exception as e:
-        print(f"❌ 服务器异常: {str(e)}")
-        return jsonify({'error': f'服务器错误: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print("🚀 启动后端服务...")
     app.run(host='0.0.0.0', port=5000)
